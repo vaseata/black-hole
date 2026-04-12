@@ -797,10 +797,12 @@ class BlackHoleApp {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
-    this.controls.enablePan = false;        // パン（平行移動）無効
+    this.controls.enablePan = false;
     this.controls.minDistance = 4;
     this.controls.maxDistance = 100;
     this.controls.target.set(0, 0, 0);
+    this.controls.minPolarAngle = 0;           // 縦回転制限なし
+    this.controls.maxPolarAngle = Math.PI;     // 天頂から天底まで自由
     this.controls.autoRotate = false;
     this.controls.autoRotateSpeed = 0.3;
 
@@ -870,12 +872,6 @@ class BlackHoleApp {
       if (this.introActive) {
         this.introActive = false;
         this.introEasing = false;
-        this.camera.position.set(this.defaultCamPos[0], this.defaultCamPos[1], this.defaultCamPos[2]);
-        this.camera.lookAt(0, 0, 0);
-        this.controls.target.set(0, 0, 0);
-        this.controls.position0.copy(this.camera.position);
-        this.controls.target0.set(0, 0, 0);
-        this.controls.reset();
       }
     };
     this.renderer.domElement.addEventListener('pointerdown', stopIntro);
@@ -1043,13 +1039,6 @@ class BlackHoleApp {
         if (et >= 1.0) {
           this.introActive = false;
           this.introEasing = false;
-          // Sync OrbitControls internal state to exact default position
-          this.camera.position.set(this.defaultCamPos[0], this.defaultCamPos[1], this.defaultCamPos[2]);
-          this.camera.lookAt(0, 0, 0);
-          this.controls.target.set(0, 0, 0);
-          this.controls.position0.copy(this.camera.position);
-          this.controls.target0.set(0, 0, 0);
-          this.controls.reset();
         }
       } else {
         const p = this.lerpKeyframes(this.introTime);
