@@ -786,9 +786,10 @@ class BlackHoleApp {
 
     // Camera: wider FOV and farther distance for portrait/mobile
     const fov = isPortrait ? 65 : 45;
-    const camDist = isPortrait ? 32 : 26;
+    const camDist = isPortrait ? 35 : 26;
+    const camY = isPortrait ? 3 : 6;
     this.camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 1000);
-    this.camera.position.set(0, 6, camDist);
+    this.camera.position.set(0, camY, camDist);
     this.camera.lookAt(0, 0, 0);
 
     // Orbit controls
@@ -853,7 +854,7 @@ class BlackHoleApp {
     }, 2000);
 
     // ── Intro camera flythrough ──
-    this.defaultCamPos = [0, 6, camDist];
+    this.defaultCamPos = [0, camY, camDist];
     this.introActive = true;
     this.introTime = 0;
 
