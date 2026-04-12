@@ -435,10 +435,10 @@ vec3 diskColor(float r, float phi, float dopplerFactor) {
   float radialBright = pow(t, 0.5) * smoothstep(uDiskOuter + 1.0, uDiskOuter - 2.0, r);
 
   // Disk structure / turbulence
-  float rotPhi = phi + uTime * uRotSpeed * 0.06;
-  float n1 = sin(rotPhi * 8.0 + r * 2.0) * 0.12 + 0.88;
-  float n2 = sin(rotPhi * 20.0 - r * 4.0 + 1.5) * 0.08 + 0.92;
-  float n3 = sin(rotPhi * 4.0 + r * 1.0 + 3.0) * 0.1 + 0.9;
+  float rotPhi = phi; // static pattern (no time animation)
+  float n1 = sin(rotPhi * 8.0 + r * 2.0) * 0.05 + 0.95;
+  float n2 = sin(rotPhi * 20.0 - r * 4.0 + 1.5) * 0.03 + 0.97;
+  float n3 = sin(rotPhi * 4.0 + r * 1.0 + 3.0) * 0.04 + 0.96;
   float structure = n1 * n2 * n3;
 
   // Doppler beaming: one side brighter, other dimmer
@@ -679,7 +679,7 @@ vec3 photonRingGlow(vec3 ro, vec3 rd) {
   float angle = atan(closestPt.z, closestPt.x);
 
   // Rich multi-stop gradient around the ring
-  float dopplerPhase = sin(angle + uTime * 0.03) * 0.5 + 0.5;
+  float dopplerPhase = sin(angle) * 0.5 + 0.5; // static gradient (no animation)
   vec3 ringColor;
   if (dopplerPhase < 0.25) {
     // Deep red → orange
