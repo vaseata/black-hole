@@ -785,10 +785,10 @@ class BlackHoleApp {
     document.body.appendChild(this.renderer.domElement);
 
     // Camera: wider FOV and farther distance for portrait/mobile
-    const fov = isPortrait ? 50 : 45;
-    const camDist = isPortrait ? 75 : 26;
+    const fov = 45;
+    const camDist = 26;
     const camX = 0;
-    const camY = isPortrait ? 3 : 6;
+    const camY = 6;
     this.camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.camera.position.set(camX, camY, camDist);
     this.camera.lookAt(0, 0, 0);
@@ -857,24 +857,19 @@ class BlackHoleApp {
       setTimeout(() => document.getElementById('loading').style.display = 'none', 800);
     }, 2000);
 
-    // ── Intro camera flythrough (desktop only) ──
+    // ── Intro camera flythrough ──
     this.defaultCamPos = [camX, camY, camDist];
-    this.introActive = !isPortrait;
+    this.introActive = true;
     this.introTime = 0;
-
-    // Random intro parameters (smooth orbit, no spline jitter)
     this.introStartAngle = Math.random() * Math.PI * 2;
     this.introDir = Math.random() < 0.5 ? 1 : -1;
     this.introStartDist = 70 + Math.random() * 20;
     this.introStartY = (5 + Math.random() * 10) * (Math.random() < 0.5 ? 1 : -1);
+    this.controls.enabled = false;
 
-    // Stop intro on any user interaction
-    // Disable controls during demo to prevent jitter
-    this.controls.enabled = !this.introActive;
     const stopIntro = () => {
       if (this.introActive) {
         this.introActive = false;
-        this.introEasing = false;
         this.controls.enabled = true;
       }
     };
