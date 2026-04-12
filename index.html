@@ -866,27 +866,10 @@ class BlackHoleApp {
     this.introStartY = (5 + Math.random() * 10) * (Math.random() < 0.5 ? 1 : -1);
     this.controls.enabled = false;
 
-    // Sync OrbitControls to current camera position (recreate controls)
-    this.syncControls = () => {
-      const pos = this.camera.position.clone();
-      this.controls.dispose();
-      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.enableDamping = false;
-      this.controls.enablePan = false;
-      this.controls.minDistance = 4;
-      this.controls.maxDistance = 100;
-      this.controls.target.set(0, 0, 0);
-      this.controls.minPolarAngle = 0.001;
-      this.controls.maxPolarAngle = Math.PI - 0.001;
-      this.controls.enabled = true;
-      this.camera.position.copy(pos);
-      this.controls.update();
-    };
-
     const stopIntro = () => {
       if (this.introActive) {
         this.introActive = false;
-        this.syncControls();
+        this.controls.enabled = true;
       }
     };
     this.renderer.domElement.addEventListener('pointerdown', stopIntro);
@@ -956,7 +939,7 @@ class BlackHoleApp {
 
       if (this.introTime >= duration) {
         this.introActive = false;
-        this.syncControls();
+        this.controls.enabled = true;
       } else {
         // Progress 0→1 with ease-in-out
         const t = this.introTime / duration;
