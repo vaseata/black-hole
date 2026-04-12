@@ -778,15 +778,17 @@ class BlackHoleApp {
 
   init() {
     this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+    const isPortrait = window.innerHeight > window.innerWidth;
     this.renderer = new THREE.WebGLRenderer({ antialias: false });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(this.isMobile ? 0.5 : 1.0);
     document.body.appendChild(this.renderer.domElement);
 
-    // Camera for orbit controls
-    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    // Cinematic starting angle (slightly above, closer)
-    this.camera.position.set(0, 6, 26);
+    // Camera: wider FOV and farther distance for portrait/mobile
+    const fov = isPortrait ? 65 : 45;
+    const camDist = isPortrait ? 32 : 26;
+    this.camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.camera.position.set(0, 6, camDist);
     this.camera.lookAt(0, 0, 0);
 
     // Orbit controls
@@ -807,7 +809,7 @@ class BlackHoleApp {
       uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
       uTime: { value: 0 },
       uCameraMatrix: { value: new THREE.Matrix4() },
-      uFov: { value: 45 },
+      uFov: { value: fov },
       uCameraPos: { value: new THREE.Vector3() },
       uDiskTemp: { value: 1.0 },
       uDiskInner: { value: 3.0 },
@@ -851,6 +853,7 @@ class BlackHoleApp {
     }, 2000);
 
     // ── Intro camera flythrough ──
+    this.defaultCamPos = [0, 6, camDist];
     this.introActive = true;
     this.introTime = 0;
 
@@ -955,7 +958,7 @@ class BlackHoleApp {
       keyframes.push({
         t,
         pos: i === numPoints - 1
-          ? [0, 6, 26]  // last point is always default
+          ? this.defaultCamPos  // last point is always default
           : [Math.sin(angle) * dist, y, Math.cos(angle) * dist]
       });
     }
@@ -1023,9 +1026,9 @@ class BlackHoleApp {
         // Ease-out cubic
         const ease = 1 - Math.pow(1 - et, 3);
         this.camera.position.set(
-          this.easeStart.x + (0 - this.easeStart.x) * ease,
-          this.easeStart.y + (6 - this.easeStart.y) * ease,
-          this.easeStart.z + (26 - this.easeStart.z) * ease,
+          this.easeStart.x + (this.defaultCamPos[0] - this.easeStart.x) * ease,
+          this.easeStart.y + (this.defaultCamPos[1] - this.easeStart.y) * ease,
+          this.easeStart.z + (this.defaultCamPos[2] - this.easeStart.z) * ease,
         );
         this.camera.lookAt(0, 0, 0);
         if (et >= 1.0) {
