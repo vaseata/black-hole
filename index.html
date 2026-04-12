@@ -795,8 +795,7 @@ class BlackHoleApp {
 
     // Orbit controls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.05;
+    this.controls.enableDamping = false;
     this.controls.enablePan = false;
     this.controls.minDistance = 4;
     this.controls.maxDistance = 100;
@@ -859,7 +858,7 @@ class BlackHoleApp {
 
     // ── Intro camera flythrough ──
     this.defaultCamPos = [camX, camY, camDist];
-    this.introActive = false; // デモ無効化テスト
+    this.introActive = true;
     this.introTime = 0;
     this.introStartAngle = Math.random() * Math.PI * 2;
     this.introDir = Math.random() < 0.5 ? 1 : -1;
@@ -872,8 +871,7 @@ class BlackHoleApp {
       const pos = this.camera.position.clone();
       this.controls.dispose();
       this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.enableDamping = true;
-      this.controls.dampingFactor = 0.05;
+      this.controls.enableDamping = false;
       this.controls.enablePan = false;
       this.controls.minDistance = 4;
       this.controls.maxDistance = 100;
