@@ -785,9 +785,9 @@ class BlackHoleApp {
     document.body.appendChild(this.renderer.domElement);
 
     // Camera: wider FOV and farther distance for portrait/mobile
-    const fov = isPortrait ? 60 : 45;
-    const camDist = isPortrait ? 50 : 26;
-    const camY = isPortrait ? 4 : 6;
+    const fov = isPortrait ? 55 : 45;
+    const camDist = isPortrait ? 48 : 26;
+    const camY = isPortrait ? 2 : 6;
     this.camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.camera.position.set(0, camY, camDist);
     this.camera.lookAt(0, 0, 0);
@@ -1035,6 +1035,11 @@ class BlackHoleApp {
         if (et >= 1.0) {
           this.introActive = false;
           this.introEasing = false;
+          // Hard reset to exact default position
+          this.camera.position.set(this.defaultCamPos[0], this.defaultCamPos[1], this.defaultCamPos[2]);
+          this.camera.lookAt(0, 0, 0);
+          this.controls.target.set(0, 0, 0);
+          this.controls.update();
         }
       } else {
         const p = this.lerpKeyframes(this.introTime);
