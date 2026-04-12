@@ -866,10 +866,19 @@ class BlackHoleApp {
     this.introStartY = (5 + Math.random() * 10) * (Math.random() < 0.5 ? 1 : -1);
     this.controls.enabled = false;
 
+    // Track user interaction to avoid idle controls.update() jitter
+    this.userInteracting = false;
+    const markInteracting = () => { this.userInteracting = true; };
+    this.renderer.domElement.addEventListener('pointerdown', markInteracting);
+    this.renderer.domElement.addEventListener('pointermove', (e) => { if (e.buttons) this.userInteracting = true; });
+    this.renderer.domElement.addEventListener('wheel', markInteracting);
+    this.renderer.domElement.addEventListener('touchmove', markInteracting);
+
     const stopIntro = () => {
       if (this.introActive) {
         this.introActive = false;
         this.controls.enabled = true;
+        this.controls.update(); // sync once
       }
     };
     this.renderer.domElement.addEventListener('pointerdown', stopIntro);
@@ -940,6 +949,7 @@ class BlackHoleApp {
       if (this.introTime >= duration) {
         this.introActive = false;
         this.controls.enabled = true;
+        this.controls.update(); // sync once
       } else {
         // Progress 0→1 with ease-in-out
         const t = this.introTime / duration;
@@ -959,9 +969,10 @@ class BlackHoleApp {
       }
     }
 
-    // Only update controls when demo is not running
-    if (!this.introActive) {
+    // Only update controls when user is interacting (prevents idle jitter)
+    if (!this.introActive && this.userInteracting) {
       this.controls.update();
+      this.userInteracting = false;
     }
 
     this.uniforms.uTime.value = elapsed;
