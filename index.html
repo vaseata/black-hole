@@ -785,11 +785,12 @@ class BlackHoleApp {
     document.body.appendChild(this.renderer.domElement);
 
     // Camera: wider FOV and farther distance for portrait/mobile
-    const fov = isPortrait ? 55 : 45;
-    const camDist = isPortrait ? 48 : 26;
-    const camY = isPortrait ? 2 : 6;
+    const fov = isPortrait ? 50 : 45;
+    const camDist = isPortrait ? 75 : 26;
+    const camX = 0;
+    const camY = isPortrait ? 3 : 6;
     this.camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 1000);
-    this.camera.position.set(0, camY, camDist);
+    this.camera.position.set(camX, camY, camDist);
     this.camera.lookAt(0, 0, 0);
 
     // Orbit controls
@@ -853,21 +854,27 @@ class BlackHoleApp {
       setTimeout(() => document.getElementById('loading').style.display = 'none', 800);
     }, 2000);
 
-    // ── Intro camera flythrough ──
-    this.defaultCamPos = [0, camY, camDist];
-    this.introActive = true;
+    // ── Intro camera flythrough (desktop only) ──
+    this.defaultCamPos = [camX, camY, camDist];
+    this.introActive = !isPortrait;
     this.introTime = 0;
 
     // Generate random intro keyframes each time
     this.introKeyframes = this.generateRandomIntro();
 
     // Stop intro on any user interaction
-    // User interaction instantly stops demo and passes through to controls
-    this.controls.enabled = true; // always enabled — works simultaneously
+    // User interaction instantly stops demo and resets to default
+    this.controls.enabled = true;
     const stopIntro = () => {
       if (this.introActive) {
         this.introActive = false;
         this.introEasing = false;
+        this.camera.position.set(this.defaultCamPos[0], this.defaultCamPos[1], this.defaultCamPos[2]);
+        this.camera.lookAt(0, 0, 0);
+        this.controls.target.set(0, 0, 0);
+        this.controls.position0.copy(this.camera.position);
+        this.controls.target0.set(0, 0, 0);
+        this.controls.reset();
       }
     };
     this.renderer.domElement.addEventListener('pointerdown', stopIntro);
@@ -1035,11 +1042,13 @@ class BlackHoleApp {
         if (et >= 1.0) {
           this.introActive = false;
           this.introEasing = false;
-          // Hard reset to exact default position
+          // Sync OrbitControls internal state to exact default position
           this.camera.position.set(this.defaultCamPos[0], this.defaultCamPos[1], this.defaultCamPos[2]);
           this.camera.lookAt(0, 0, 0);
           this.controls.target.set(0, 0, 0);
-          this.controls.update();
+          this.controls.position0.copy(this.camera.position);
+          this.controls.target0.set(0, 0, 0);
+          this.controls.reset();
         }
       } else {
         const p = this.lerpKeyframes(this.introTime);
@@ -1048,7 +1057,10 @@ class BlackHoleApp {
       }
     }
 
-    this.controls.update();
+    // Only update controls when demo is not running
+    if (!this.introActive) {
+      this.controls.update();
+    }
 
     this.uniforms.uTime.value = elapsed;
     this.uniforms.uFov.value = this.camera.fov;
