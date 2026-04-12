@@ -801,8 +801,8 @@ class BlackHoleApp {
     this.controls.minDistance = 4;
     this.controls.maxDistance = 100;
     this.controls.target.set(0, 0, 0);
-    this.controls.minPolarAngle = 0;           // 縦回転制限なし
-    this.controls.maxPolarAngle = Math.PI;     // 天頂から天底まで自由
+    this.controls.minPolarAngle = 0.001;        // ほぼ天頂まで
+    this.controls.maxPolarAngle = Math.PI - 0.001; // ほぼ天底まで
     this.controls.autoRotate = false;
     this.controls.autoRotateSpeed = 0.3;
 
