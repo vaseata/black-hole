@@ -866,12 +866,13 @@ class BlackHoleApp {
     this.introKeyframes = this.generateRandomIntro();
 
     // Stop intro on any user interaction
-    // User interaction instantly stops demo and resets to default
-    this.controls.enabled = true;
+    // Disable controls during demo to prevent jitter
+    this.controls.enabled = !this.introActive;
     const stopIntro = () => {
       if (this.introActive) {
         this.introActive = false;
         this.introEasing = false;
+        this.controls.enabled = true;
       }
     };
     this.renderer.domElement.addEventListener('pointerdown', stopIntro);
@@ -1039,6 +1040,7 @@ class BlackHoleApp {
         if (et >= 1.0) {
           this.introActive = false;
           this.introEasing = false;
+          this.controls.enabled = true;
         }
       } else {
         const p = this.lerpKeyframes(this.introTime);
