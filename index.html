@@ -981,7 +981,7 @@ class BlackHoleApp {
     const stopIntro = () => {
       if (this.introActive) {
         this.introActive = false;
-        this.camera.position.set(0, camY, camDist);
+        this.camera.position.copy(this.defaultCamPos);
         this.camera.lookAt(0, 0, 0);
         this.controls.enabled = true;
         this.controls.update();
@@ -1052,7 +1052,7 @@ class BlackHoleApp {
 
       if (this.introTime >= this.introDuration) {
         this.introActive = false;
-        this.camera.position.set(0, camY, camDist);
+        this.camera.position.copy(this.defaultCamPos);
         this.camera.lookAt(0, 0, 0);
         this.controls.enabled = true;
         this.controls.update();
