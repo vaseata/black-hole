@@ -939,32 +939,19 @@ class BlackHoleApp {
       return dummy.quaternion.clone();
     };
 
-    // Spaceship flyby: one continuous arc, never retracing
-    const keyframes = [
-      { t: 0.0,  angle: -0.3*introDir, dist: camDist*1.1,  y: camY-2 },  // approach from side
-      { t: 0.25, angle: -0.15*introDir,dist: camDist*0.95, y: camY },     // passing by
-      { t: 0.5,  angle: 0.05*introDir, dist: camDist*0.85, y: camY+3 },  // sweeping past
-      { t: 0.75, angle: 0.15*introDir, dist: camDist*0.9,  y: camY+5 },  // rising above
-      { t: 1.0,  angle: 0,             dist: camDist,      y: camY },     // settle into orbit
-    ];
-
-    // Interpolate keyframes into smooth path
+    // Single continuous arc — no keyframes, no hesitation
+    const startAngle = -0.25 * introDir;
+    const endAngle = 0;
     const numKeys = 80;
     this.introKeys = [];
     for (let i = 0; i <= numKeys; i++) {
       const t = i / numKeys;
-      // Find surrounding keyframes
-      let k0 = keyframes[0], k1 = keyframes[1];
-      for (let j = 0; j < keyframes.length - 1; j++) {
-        if (t >= keyframes[j].t && t <= keyframes[j+1].t) {
-          k0 = keyframes[j]; k1 = keyframes[j+1]; break;
-        }
-      }
-      const localT = (t - k0.t) / (k1.t - k0.t);
-      const ease = localT * localT * (3 - 2 * localT); // smoothstep
-      const angle = k0.angle + (k1.angle - k0.angle) * ease;
-      const dist  = k0.dist  + (k1.dist  - k0.dist)  * ease;
-      const y     = k0.y     + (k1.y     - k0.y)     * ease;
+      // Single smooth ease-in-out for entire path
+      const ease = t * t * (3 - 2 * t);
+      // All values flow in one direction, never reversing
+      const angle = startAngle + (endAngle - startAngle) * ease;
+      const dist = camDist * (1.05 - 0.15 * Math.sin(t * Math.PI));  // subtle zoom arc
+      const y = camY + 4 * Math.sin(t * Math.PI);                     // gentle rise and descend
       const pos = new THREE.Vector3(Math.sin(angle) * dist, y, Math.cos(angle) * dist);
       const quat = quatFromPos(pos);
       this.introKeys.push({ pos, quat });
