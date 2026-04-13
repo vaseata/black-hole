@@ -927,7 +927,7 @@ class BlackHoleApp {
     this.introTime = 0;
     this.controls.enabled = false;
 
-    // Pre-compute intro: orbit around BH showing different angles + zoom
+    // Pre-compute intro: vertical sweep + zoom to show lensing changes
     const introDir = Math.random() < 0.5 ? 1 : -1;
 
     // Helper: compute quaternion for a camera looking at origin
@@ -939,17 +939,15 @@ class BlackHoleApp {
       return dummy.quaternion.clone();
     };
 
-    // Keyframe sequence: angle, distance, height (normalized 0-1 time)
-    // Always starts and ends at default position, orbits + zooms in between
-    const orbitSweep = introDir * (1.5 + Math.random() * 1.0); // 90-140 deg
+    // Focus on Y-axis movement to showcase gravitational lensing changes
     const keyframes = [
-      { t: 0.0,  angle: 0,              dist: camDist,     y: camY },      // default
-      { t: 0.15, angle: orbitSweep*0.2,  dist: camDist*0.7, y: camY+3 },   // zoom in, rise
-      { t: 0.35, angle: orbitSweep*0.5,  dist: camDist*0.45,y: camY+8 },   // close, high angle
-      { t: 0.5,  angle: orbitSweep*0.7,  dist: camDist*0.35,y: camY },     // very close, edge-on
-      { t: 0.7,  angle: orbitSweep*0.85, dist: camDist*0.6, y: camY-4 },   // pull back, below
-      { t: 0.85, angle: orbitSweep*0.95, dist: camDist*0.85,y: camY+1 },   // returning
-      { t: 1.0,  angle: 0,              dist: camDist,     y: camY },      // back to default
+      { t: 0.0,  angle: 0,   dist: camDist,      y: camY },       // default view
+      { t: 0.2,  angle: 0.1*introDir, dist: camDist*0.8, y: 12 }, // rise up, zoom in
+      { t: 0.4,  angle: 0.2*introDir, dist: camDist*0.6, y: 20 }, // high above, close
+      { t: 0.55, angle: 0.3*introDir, dist: camDist*0.5, y: 8 },  // descend, closest
+      { t: 0.7,  angle: 0.15*introDir,dist: camDist*0.7, y: -5 }, // below disk plane
+      { t: 0.85, angle: 0.05*introDir,dist: camDist*0.9, y: 2 },  // returning low
+      { t: 1.0,  angle: 0,   dist: camDist,      y: camY },       // back to default
     ];
 
     // Interpolate keyframes into smooth path
