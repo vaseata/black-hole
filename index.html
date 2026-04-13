@@ -928,12 +928,15 @@ class BlackHoleApp {
     this.controls.enabled = false;
 
     // Pre-compute intro path as position + quaternion pairs
-    const startAngle = Math.random() * Math.PI * 2;
+    // End angle = 0 so the demo lands exactly at defaultCamPos
+    const endAngle = 0;
     const introDir = Math.random() < 0.5 ? 1 : -1;
-    const startDist = 70 + Math.random() * 20;
-    const startY = (5 + Math.random() * 10) * (Math.random() < 0.5 ? 1 : -1);
+    const sweep = 1.0 + Math.random() * 1.5; // 60-140 degree sweep
+    const startAngle = endAngle - introDir * sweep;
+    const startDist = 50 + Math.random() * 20;
+    const startY = camY + (3 + Math.random() * 8) * (Math.random() < 0.5 ? 1 : -1);
 
-    // Helper: compute quaternion for a camera looking at origin from a position
+    // Helper: compute quaternion for a camera looking at origin
     const quatFromPos = (pos) => {
       const dummy = new THREE.Object3D();
       dummy.position.copy(pos);
@@ -943,12 +946,12 @@ class BlackHoleApp {
     };
 
     // Pre-compute keyframe quaternions (computed ONCE, not per frame)
-    const numKeys = 60; // 60 pre-computed keyframes
+    const numKeys = 60;
     this.introKeys = [];
     for (let i = 0; i <= numKeys; i++) {
       const t = i / numKeys;
       const ease = t * t * (3 - 2 * t);
-      const angle = startAngle + introDir * ease * 2.5;
+      const angle = startAngle + (endAngle - startAngle) * ease;
       const dist = startDist + (camDist - startDist) * ease;
       const y = startY + (camY - startY) * ease;
       const pos = new THREE.Vector3(Math.sin(angle) * dist, y, Math.cos(angle) * dist);
