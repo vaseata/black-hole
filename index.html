@@ -935,25 +935,37 @@ class BlackHoleApp {
       return dummy.quaternion.clone();
     };
 
-    // Cinematic flyby: show BH from different angles to inspire interaction
-    const startAngle = -0.5 * introDir;
-    const endAngle = 0;
-    const numKeys = 100;
+    // Cinematic flyby: 3 random variations
+    const variant = Math.floor(Math.random() * 3);
+    const numKeys = 80;
     this.introKeys = [];
     for (let i = 0; i <= numKeys; i++) {
       const t = i / numKeys;
       const ease = t * t * (3 - 2 * t);
-      // Steady one-directional orbit
-      const angle = startAngle + (endAngle - startAngle) * ease;
-      // Zoom: start far, come close in middle, pull back to default
-      const dist = camDist * (1.1 - 0.3 * Math.sin(t * Math.PI));
-      // Height: rise high to show top-down, return to default at t=1
-      const y = camY + 14 * Math.sin(t * Math.PI);
+      let angle, dist, y;
+
+      if (variant === 0) {
+        // Variant A: gentle rise with subtle zoom
+        angle = introDir * 0.15 * Math.sin(t * Math.PI);
+        dist = camDist * (1.0 - 0.12 * Math.sin(t * Math.PI));
+        y = camY + 6 * Math.sin(t * Math.PI);
+      } else if (variant === 1) {
+        // Variant B: start from below, cross through disk plane upward
+        angle = introDir * 0.1 * ease;
+        dist = camDist * (1.0 - 0.1 * Math.sin(t * Math.PI));
+        y = camY - 10 + 16 * ease;
+      } else {
+        // Variant C: slow zoom in then out, minimal angle change
+        angle = introDir * 0.08 * Math.sin(t * Math.PI);
+        dist = camDist * (1.0 - 0.2 * Math.sin(t * Math.PI));
+        y = camY - 3 * Math.sin(t * Math.PI * 0.7);
+      }
+
       const pos = new THREE.Vector3(Math.sin(angle) * dist, y, Math.cos(angle) * dist);
       const quat = quatFromPos(pos);
       this.introKeys.push({ pos, quat });
     }
-    this.introDuration = 12.0;
+    this.introDuration = 8.0;
 
     // Set camera to intro start
     this.camera.position.copy(this.introKeys[0].pos);
