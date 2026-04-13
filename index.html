@@ -173,7 +173,7 @@ h2 { font-size: 16px; color: #ffb43c; margin-bottom: 12px; font-weight: 300; let
 
 <div id="fps"></div>
 <button id="help-toggle" class="hidden" style="font-weight:300;letter-spacing:1px;" onclick="var g=document.getElementById('controls-guide');var b=this;g.classList.remove('fade');b.classList.add('hidden');clearTimeout(window._guideFade);window._guideFade=setTimeout(function(){g.classList.add('fade');b.classList.remove('hidden');},6000);">i</button>
-<div id="controls-guide">
+<div id="controls-guide" class="fade">
   <div class="guide-item" id="guide-rotate">
     <div class="guide-icon" id="icon-rotate"></div>
     <div class="guide-label" id="label-rotate"></div>
@@ -207,11 +207,7 @@ h2 { font-size: 16px; color: #ffb43c; margin-bottom: 12px; font-weight: 300; let
     document.getElementById('icon-pan').textContent = '\u2328\uFE0F';
     document.getElementById('label-pan').innerHTML = 'Shift+\u30C9\u30E9\u30C3\u30B0<br>PAN';
   }
-  // Auto fade after 6 seconds, show i button
-  window._guideFade = setTimeout(function() {
-    document.getElementById('controls-guide').classList.add('fade');
-    document.getElementById('help-toggle').classList.remove('hidden');
-  }, 6000);
+  // Guide starts hidden, shown when demo ends
   // Tap to dismiss
   document.getElementById('controls-guide').addEventListener('click', function() {
     this.classList.add('fade');
@@ -963,10 +959,23 @@ class BlackHoleApp {
     this.camera.position.copy(this.introKeys[0].pos);
     this.camera.quaternion.copy(this.introKeys[0].quat);
 
+    const showGuide = () => {
+      const g = document.getElementById('controls-guide');
+      const b = document.getElementById('help-toggle');
+      g.classList.remove('fade');
+      b.classList.add('hidden');
+      clearTimeout(window._guideFade);
+      window._guideFade = setTimeout(() => {
+        g.classList.add('fade');
+        b.classList.remove('hidden');
+      }, 6000);
+    };
+
     const stopIntro = () => {
       if (this.introActive) {
         this.introActive = false;
         this.controls.enabled = true;
+        showGuide();
       }
     };
     this.renderer.domElement.addEventListener('pointerdown', stopIntro);
@@ -1037,6 +1046,7 @@ class BlackHoleApp {
         this.camera.position.copy(lastKey.pos);
         this.camera.quaternion.copy(lastKey.quat);
         this.controls.enabled = true;
+        showGuide();
       } else {
         // Find position in pre-computed keyframes and SLERP between them
         const progress = this.introTime / this.introDuration;
