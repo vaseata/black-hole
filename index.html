@@ -435,7 +435,7 @@ vec3 diskColor(float r, float phi, float dopplerFactor) {
   float radialBright = pow(t, 0.5) * smoothstep(uDiskOuter + 1.0, uDiskOuter - 2.0, r);
 
   // Disk structure / turbulence
-  float rotPhi = phi + uTime * uRotSpeed * 0.02;
+  float rotPhi = phi + uTime * uRotSpeed * 0.001;
   float n1 = sin(rotPhi * 8.0 + r * 2.0) * 0.05 + 0.95;
   float n2 = sin(rotPhi * 20.0 - r * 4.0 + 1.5) * 0.03 + 0.97;
   float n3 = sin(rotPhi * 4.0 + r * 1.0 + 3.0) * 0.04 + 0.96;
@@ -484,9 +484,9 @@ vec3 sampleJet(vec3 p) {
 
   // Internal structure: knots and helical patterns
   float phi = atan(p.z, p.x);
-  float knots = 0.7 + 0.3 * sin(distFromBase * 2.5 - uTime * 3.0);
-  float helix = 0.85 + 0.15 * sin(phi * 2.0 + distFromBase * 1.5 - uTime * 4.0);
-  float turbulence = 0.9 + 0.1 * sin(distFromBase * 8.0 + phi * 5.0 + uTime * 2.0);
+  float knots = 0.7 + 0.3 * sin(distFromBase * 2.5 - uTime * 0.1);
+  float helix = 0.85 + 0.15 * sin(phi * 2.0 + distFromBase * 1.5 - uTime * 0.15);
+  float turbulence = 0.9 + 0.1 * sin(distFromBase * 8.0 + phi * 5.0 + uTime * 0.08);
 
   float density = radialFade * lengthFade * knots * helix * turbulence;
 
@@ -679,7 +679,7 @@ vec3 photonRingGlow(vec3 ro, vec3 rd) {
   float angle = atan(closestPt.z, closestPt.x);
 
   // Rich multi-stop gradient around the ring
-  float dopplerPhase = sin(angle + uTime * 0.03) * 0.5 + 0.5;
+  float dopplerPhase = sin(angle + uTime * 0.001) * 0.5 + 0.5;
   vec3 ringColor;
   if (dopplerPhase < 0.25) {
     // Deep red → orange
@@ -969,7 +969,9 @@ class BlackHoleApp {
       }
     }
 
-    // controls.update() removed — jitter test
+    if (!this.introActive) {
+      this.controls.update();
+    }
 
     this.uniforms.uTime.value = elapsed;
     this.uniforms.uFov.value = this.camera.fov;
