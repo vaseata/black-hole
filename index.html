@@ -921,29 +921,50 @@ class BlackHoleApp {
       setTimeout(() => document.getElementById('loading').style.display = 'none', 800);
     }, 2000);
 
-    // ── Intro camera flythrough ──
-    this.defaultCamPos = [camX, camY, camDist];
-    this.introActive = false;
+    // ── Intro camera flythrough (quaternion-based, no lookAt jitter) ──
+    this.defaultCamPos = new THREE.Vector3(camX, camY, camDist);
+    this.introActive = true;
     this.introTime = 0;
-    this.introStartAngle = Math.random() * Math.PI * 2;
-    this.introDir = Math.random() < 0.5 ? 1 : -1;
-    this.introStartDist = 70 + Math.random() * 20;
-    this.introStartY = (5 + Math.random() * 10) * (Math.random() < 0.5 ? 1 : -1);
-    this.controls.enabled = !this.introActive;
+    this.controls.enabled = false;
 
-    // Track user interaction to avoid idle controls.update() jitter
-    this.userInteracting = false;
-    const markInteracting = () => { this.userInteracting = true; };
-    this.renderer.domElement.addEventListener('pointerdown', markInteracting);
-    this.renderer.domElement.addEventListener('pointermove', (e) => { if (e.buttons) this.userInteracting = true; });
-    this.renderer.domElement.addEventListener('wheel', markInteracting);
-    this.renderer.domElement.addEventListener('touchmove', markInteracting);
+    // Pre-compute intro path as position + quaternion pairs
+    const startAngle = Math.random() * Math.PI * 2;
+    const introDir = Math.random() < 0.5 ? 1 : -1;
+    const startDist = 70 + Math.random() * 20;
+    const startY = (5 + Math.random() * 10) * (Math.random() < 0.5 ? 1 : -1);
+
+    // Helper: compute quaternion for a camera looking at origin from a position
+    const quatFromPos = (pos) => {
+      const dummy = new THREE.Object3D();
+      dummy.position.copy(pos);
+      dummy.lookAt(0, 0, 0);
+      dummy.updateMatrix();
+      return dummy.quaternion.clone();
+    };
+
+    // Pre-compute keyframe quaternions (computed ONCE, not per frame)
+    const numKeys = 60; // 60 pre-computed keyframes
+    this.introKeys = [];
+    for (let i = 0; i <= numKeys; i++) {
+      const t = i / numKeys;
+      const ease = t * t * (3 - 2 * t);
+      const angle = startAngle + introDir * ease * 2.5;
+      const dist = startDist + (camDist - startDist) * ease;
+      const y = startY + (camY - startY) * ease;
+      const pos = new THREE.Vector3(Math.sin(angle) * dist, y, Math.cos(angle) * dist);
+      const quat = quatFromPos(pos);
+      this.introKeys.push({ pos, quat });
+    }
+    this.introDuration = 7.0;
+
+    // Set camera to intro start
+    this.camera.position.copy(this.introKeys[0].pos);
+    this.camera.quaternion.copy(this.introKeys[0].quat);
 
     const stopIntro = () => {
       if (this.introActive) {
         this.introActive = false;
         this.controls.enabled = true;
-        this.controls.update(); // sync once
       }
     };
     this.renderer.domElement.addEventListener('pointerdown', stopIntro);
@@ -998,39 +1019,34 @@ class BlackHoleApp {
     this.bloomPass.setSize(rw, rh);
   }
 
-  // (spline code removed — using smooth orbit instead)
-
   animate() {
     requestAnimationFrame(() => this.animate());
 
     const dt = this.clock.getDelta();
     const elapsed = this.clock.getElapsedTime();
 
-    // ── Intro camera flythrough (smooth orbit) ──
+    // ── Intro camera flythrough (quaternion SLERP, no lookAt) ──
     if (this.introActive) {
       this.introTime += dt;
-      const duration = 7.0;
 
-      if (this.introTime >= duration) {
+      if (this.introTime >= this.introDuration) {
         this.introActive = false;
+        this.camera.position.copy(this.defaultCamPos);
+        this.camera.quaternion.copy(this.introKeys[this.introKeys.length - 1].quat);
         this.controls.enabled = true;
-        this.controls.update(); // sync once
       } else {
-        // Progress 0→1 with ease-in-out
-        const t = this.introTime / duration;
-        const ease = t * t * (3 - 2 * t); // smoothstep
+        // Find position in pre-computed keyframes and SLERP between them
+        const progress = this.introTime / this.introDuration;
+        const keyIdx = progress * (this.introKeys.length - 1);
+        const idx = Math.min(Math.floor(keyIdx), this.introKeys.length - 2);
+        const frac = keyIdx - idx;
 
-        // Smooth orbit: angle sweeps, distance shrinks, height settles
-        const angle = this.introStartAngle + this.introDir * ease * 2.5;
-        const dist = this.introStartDist + (this.defaultCamPos[2] - this.introStartDist) * ease;
-        const y = this.introStartY + (this.defaultCamPos[1] - this.introStartY) * ease;
+        const k0 = this.introKeys[idx];
+        const k1 = this.introKeys[idx + 1];
 
-        this.camera.position.set(
-          Math.sin(angle) * dist,
-          y,
-          Math.cos(angle) * dist
-        );
-        this.camera.lookAt(0, 0, 0);
+        // Interpolate position (lerp) and rotation (slerp)
+        this.camera.position.lerpVectors(k0.pos, k1.pos, frac);
+        this.camera.quaternion.slerpQuaternions(k0.quat, k1.quat, frac);
       }
     }
 
