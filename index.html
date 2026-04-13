@@ -435,7 +435,7 @@ vec3 diskColor(float r, float phi, float dopplerFactor) {
   float radialBright = pow(t, 0.5) * smoothstep(uDiskOuter + 1.0, uDiskOuter - 2.0, r);
 
   // Disk structure / turbulence
-  float rotPhi = phi; // static pattern (no time animation)
+  float rotPhi = phi + uTime * uRotSpeed * 0.02;
   float n1 = sin(rotPhi * 8.0 + r * 2.0) * 0.05 + 0.95;
   float n2 = sin(rotPhi * 20.0 - r * 4.0 + 1.5) * 0.03 + 0.97;
   float n3 = sin(rotPhi * 4.0 + r * 1.0 + 3.0) * 0.04 + 0.96;
@@ -679,7 +679,7 @@ vec3 photonRingGlow(vec3 ro, vec3 rd) {
   float angle = atan(closestPt.z, closestPt.x);
 
   // Rich multi-stop gradient around the ring
-  float dopplerPhase = sin(angle) * 0.5 + 0.5; // static gradient (no animation)
+  float dopplerPhase = sin(angle + uTime * 0.03) * 0.5 + 0.5;
   vec3 ringColor;
   if (dopplerPhase < 0.25) {
     // Deep red → orange
@@ -841,7 +841,7 @@ class BlackHoleApp {
 
     this.bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.6, 0.5, 0.8
+      0.0, 0.5, 0.8  // strength=0 for jitter test
     );
     this.composer.addPass(this.bloomPass);
 
