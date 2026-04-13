@@ -959,7 +959,7 @@ class BlackHoleApp {
     this.camera.position.copy(this.introKeys[0].pos);
     this.camera.quaternion.copy(this.introKeys[0].quat);
 
-    const showGuide = () => {
+    this.showGuide = () => {
       const g = document.getElementById('controls-guide');
       const b = document.getElementById('help-toggle');
       g.classList.remove('fade');
@@ -975,7 +975,7 @@ class BlackHoleApp {
       if (this.introActive) {
         this.introActive = false;
         this.controls.enabled = true;
-        showGuide();
+        this.showGuide();
       }
     };
     this.renderer.domElement.addEventListener('pointerdown', stopIntro);
@@ -1046,7 +1046,7 @@ class BlackHoleApp {
         this.camera.position.copy(lastKey.pos);
         this.camera.quaternion.copy(lastKey.quat);
         this.controls.enabled = true;
-        showGuide();
+        this.showGuide();
       } else {
         // Find position in pre-computed keyframes and SLERP between them
         const progress = this.introTime / this.introDuration;
