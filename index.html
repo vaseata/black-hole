@@ -785,7 +785,6 @@ class BlackHoleApp {
     document.body.appendChild(this.renderer.domElement);
 
     // Camera: wider FOV and farther distance for portrait/mobile
-    const isPortrait = window.innerHeight > window.innerWidth;
     const fov = isPortrait ? 60 : 45;
     const camDist = isPortrait ? 45 : 26;
     const camX = 0;
