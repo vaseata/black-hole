@@ -272,10 +272,6 @@ uniform float uJetLength;
 float hash3(vec3 p) {
   return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453);
 }
-float hash2(vec2 p) {
-  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
-
 // ── Smooth value noise (3D) ──
 float vnoise(vec3 p) {
   vec3 i = floor(p);
@@ -291,18 +287,6 @@ float vnoise(vec3 p) {
   float k = hash3(i + vec3(1,1,1));
   return mix(mix(mix(a,b,f.x), mix(c,d,f.x), f.y),
              mix(mix(e,g,f.x), mix(h,k,f.x), f.y), f.z);
-}
-
-// ── Fractal Brownian Motion ──
-float fbm(vec3 p) {
-  float v = 0.0;
-  float a = 0.5;
-  for (int i = 0; i < 4; i++) {
-    v += a * vnoise(p);
-    p *= 2.1;
-    a *= 0.5;
-  }
-  return v;
 }
 
 // ── Deep field star background ──
@@ -864,7 +848,6 @@ class BlackHoleApp {
     this.controls.minPolarAngle = 0.001;        // ほぼ天頂まで
     this.controls.maxPolarAngle = Math.PI - 0.001; // ほぼ天底まで
     this.controls.autoRotate = false;
-    this.controls.autoRotateSpeed = 0.3;
 
     // Full screen quad
     this.quadScene = new THREE.Scene();
