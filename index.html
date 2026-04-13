@@ -853,7 +853,7 @@ class BlackHoleApp {
     const fov = isPortrait ? 60 : 45;
     const camDist = isPortrait ? 70 : 34;
     const camX = 0;
-    const camY = 6;
+    const camY = 4;
     this.camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.camera.position.set(camX, camY, camDist);
     this.camera.lookAt(0, 0, 0);
@@ -927,14 +927,8 @@ class BlackHoleApp {
     this.introTime = 0;
     this.controls.enabled = false;
 
-    // Pre-compute intro path as position + quaternion pairs
-    // End angle = 0 so the demo lands exactly at defaultCamPos
-    const endAngle = 0;
+    // Pre-compute intro: orbit around BH showing different angles + zoom
     const introDir = Math.random() < 0.5 ? 1 : -1;
-    const sweep = 1.0 + Math.random() * 1.5; // 60-140 degree sweep
-    const startAngle = endAngle - introDir * sweep;
-    const startDist = 50 + Math.random() * 20;
-    const startY = camY + (3 + Math.random() * 8) * (Math.random() < 0.5 ? 1 : -1);
 
     // Helper: compute quaternion for a camera looking at origin
     const quatFromPos = (pos) => {
@@ -945,15 +939,36 @@ class BlackHoleApp {
       return dummy.quaternion.clone();
     };
 
-    // Pre-compute keyframe quaternions (computed ONCE, not per frame)
-    const numKeys = 60;
+    // Keyframe sequence: angle, distance, height (normalized 0-1 time)
+    // Always starts and ends at default position, orbits + zooms in between
+    const orbitSweep = introDir * (1.5 + Math.random() * 1.0); // 90-140 deg
+    const keyframes = [
+      { t: 0.0,  angle: 0,              dist: camDist,     y: camY },      // default
+      { t: 0.15, angle: orbitSweep*0.2,  dist: camDist*0.7, y: camY+3 },   // zoom in, rise
+      { t: 0.35, angle: orbitSweep*0.5,  dist: camDist*0.45,y: camY+8 },   // close, high angle
+      { t: 0.5,  angle: orbitSweep*0.7,  dist: camDist*0.35,y: camY },     // very close, edge-on
+      { t: 0.7,  angle: orbitSweep*0.85, dist: camDist*0.6, y: camY-4 },   // pull back, below
+      { t: 0.85, angle: orbitSweep*0.95, dist: camDist*0.85,y: camY+1 },   // returning
+      { t: 1.0,  angle: 0,              dist: camDist,     y: camY },      // back to default
+    ];
+
+    // Interpolate keyframes into smooth path
+    const numKeys = 80;
     this.introKeys = [];
     for (let i = 0; i <= numKeys; i++) {
       const t = i / numKeys;
-      const ease = t * t * (3 - 2 * t);
-      const angle = startAngle + (endAngle - startAngle) * ease;
-      const dist = startDist + (camDist - startDist) * ease;
-      const y = startY + (camY - startY) * ease;
+      // Find surrounding keyframes
+      let k0 = keyframes[0], k1 = keyframes[1];
+      for (let j = 0; j < keyframes.length - 1; j++) {
+        if (t >= keyframes[j].t && t <= keyframes[j+1].t) {
+          k0 = keyframes[j]; k1 = keyframes[j+1]; break;
+        }
+      }
+      const localT = (t - k0.t) / (k1.t - k0.t);
+      const ease = localT * localT * (3 - 2 * localT); // smoothstep
+      const angle = k0.angle + (k1.angle - k0.angle) * ease;
+      const dist  = k0.dist  + (k1.dist  - k0.dist)  * ease;
+      const y     = k0.y     + (k1.y     - k0.y)     * ease;
       const pos = new THREE.Vector3(Math.sin(angle) * dist, y, Math.cos(angle) * dist);
       const quat = quatFromPos(pos);
       this.introKeys.push({ pos, quat });
