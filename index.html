@@ -547,7 +547,8 @@ vec3 traceRay(vec3 ro, vec3 rd) {
           jAlpha += length(jc) * 0.08;
         }
       }
-      return jetCol + starField(normalize(vel)) * (1.0 - min(length(jetCol) * 0.5, 0.9));
+      vec3 parallaxDir = normalize(vel + uCameraPos * 0.003);
+      return jetCol + starField(parallaxDir) * (1.0 - min(length(jetCol) * 0.5, 0.9));
     }
   }
 
@@ -571,7 +572,7 @@ vec3 traceRay(vec3 ro, vec3 rd) {
           jetAlpha += length(jc) * 0.2;
         }
       }
-      vec3 starCol = starField(normalize(vel));
+      vec3 starCol = starField(normalize(vel + uCameraPos * 0.003));
       return diskAccum + starCol * (1.0 - diskAlpha);
     }
 
