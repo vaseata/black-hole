@@ -981,8 +981,10 @@ class BlackHoleApp {
     const stopIntro = () => {
       if (this.introActive) {
         this.introActive = false;
-        this.introJustEnded = true;
+        this.camera.position.set(0, camY, camDist);
+        this.camera.lookAt(0, 0, 0);
         this.controls.enabled = true;
+        this.controls.update();
         this.showGuide();
       }
     };
@@ -1050,8 +1052,10 @@ class BlackHoleApp {
 
       if (this.introTime >= this.introDuration) {
         this.introActive = false;
-        this.introJustEnded = true; // skip controls.update for 1 frame
+        this.camera.position.set(0, camY, camDist);
+        this.camera.lookAt(0, 0, 0);
         this.controls.enabled = true;
+        this.controls.update();
         this.showGuide();
       } else {
         // Find position in pre-computed keyframes and SLERP between them
@@ -1070,11 +1074,7 @@ class BlackHoleApp {
     }
 
     if (!this.introActive) {
-      if (this.introJustEnded) {
-        this.introJustEnded = false; // skip this frame
-      } else {
-        this.controls.update();
-      }
+      this.controls.update();
     }
 
     this.uniforms.uTime.value = elapsed;
