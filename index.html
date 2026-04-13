@@ -939,19 +939,20 @@ class BlackHoleApp {
       return dummy.quaternion.clone();
     };
 
-    // Single continuous arc — no keyframes, no hesitation
-    const startAngle = -0.25 * introDir;
+    // Cinematic flyby: show BH from different angles to inspire interaction
+    const startAngle = -0.5 * introDir;
     const endAngle = 0;
-    const numKeys = 80;
+    const numKeys = 100;
     this.introKeys = [];
     for (let i = 0; i <= numKeys; i++) {
       const t = i / numKeys;
-      // Single smooth ease-in-out for entire path
       const ease = t * t * (3 - 2 * t);
-      // All values flow in one direction, never reversing
+      // Steady one-directional orbit
       const angle = startAngle + (endAngle - startAngle) * ease;
-      const dist = camDist * (1.05 - 0.15 * Math.sin(t * Math.PI));  // subtle zoom arc
-      const y = camY + 4 * Math.sin(t * Math.PI);                     // gentle rise and descend
+      // Zoom: start far, come close in middle, pull back to default
+      const dist = camDist * (1.1 - 0.3 * Math.sin(t * Math.PI));
+      // Height: rise high to show top-down, return to default at t=1
+      const y = camY + 14 * Math.sin(t * Math.PI);
       const pos = new THREE.Vector3(Math.sin(angle) * dist, y, Math.cos(angle) * dist);
       const quat = quatFromPos(pos);
       this.introKeys.push({ pos, quat });
@@ -1032,8 +1033,9 @@ class BlackHoleApp {
 
       if (this.introTime >= this.introDuration) {
         this.introActive = false;
-        this.camera.position.copy(this.defaultCamPos);
-        this.camera.quaternion.copy(this.introKeys[this.introKeys.length - 1].quat);
+        const lastKey = this.introKeys[this.introKeys.length - 1];
+        this.camera.position.copy(lastKey.pos);
+        this.camera.quaternion.copy(lastKey.quat);
         this.controls.enabled = true;
       } else {
         // Find position in pre-computed keyframes and SLERP between them
