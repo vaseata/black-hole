@@ -936,7 +936,7 @@ class BlackHoleApp {
     };
 
     // One-way smooth approach to default position
-    const variant = Math.floor(Math.random() * 3);
+    const variant = (Date.now() % 3);
     // Start positions (slightly offset from default)
     let startA, startD, startY;
     if (variant === 0) {
@@ -981,6 +981,7 @@ class BlackHoleApp {
     const stopIntro = () => {
       if (this.introActive) {
         this.introActive = false;
+        this.introJustEnded = true;
         this.controls.enabled = true;
         this.showGuide();
       }
@@ -1049,9 +1050,7 @@ class BlackHoleApp {
 
       if (this.introTime >= this.introDuration) {
         this.introActive = false;
-        const lastKey = this.introKeys[this.introKeys.length - 1];
-        this.camera.position.copy(lastKey.pos);
-        this.camera.quaternion.copy(lastKey.quat);
+        this.introJustEnded = true; // skip controls.update for 1 frame
         this.controls.enabled = true;
         this.showGuide();
       } else {
@@ -1071,7 +1070,11 @@ class BlackHoleApp {
     }
 
     if (!this.introActive) {
-      this.controls.update();
+      if (this.introJustEnded) {
+        this.introJustEnded = false; // skip this frame
+      } else {
+        this.controls.update();
+      }
     }
 
     this.uniforms.uTime.value = elapsed;
