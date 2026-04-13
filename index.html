@@ -939,13 +939,13 @@ class BlackHoleApp {
       return dummy.quaternion.clone();
     };
 
-    // Gentle cinematic movement: slow vertical drift + subtle zoom
+    // Spaceship flyby: one continuous arc, never retracing
     const keyframes = [
-      { t: 0.0,  angle: 0,             dist: camDist,      y: camY },     // default
-      { t: 0.3,  angle: 0.05*introDir, dist: camDist*0.9,  y: camY+3 },  // slowly rise
-      { t: 0.6,  angle: 0.1*introDir,  dist: camDist*0.85, y: camY+6 },  // a bit higher
-      { t: 0.8,  angle: 0.05*introDir, dist: camDist*0.9,  y: camY+2 },  // gently descend
-      { t: 1.0,  angle: 0,             dist: camDist,      y: camY },     // back to default
+      { t: 0.0,  angle: -0.3*introDir, dist: camDist*1.1,  y: camY-2 },  // approach from side
+      { t: 0.25, angle: -0.15*introDir,dist: camDist*0.95, y: camY },     // passing by
+      { t: 0.5,  angle: 0.05*introDir, dist: camDist*0.85, y: camY+3 },  // sweeping past
+      { t: 0.75, angle: 0.15*introDir, dist: camDist*0.9,  y: camY+5 },  // rising above
+      { t: 1.0,  angle: 0,             dist: camDist,      y: camY },     // settle into orbit
     ];
 
     // Interpolate keyframes into smooth path
