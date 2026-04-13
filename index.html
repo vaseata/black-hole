@@ -939,15 +939,13 @@ class BlackHoleApp {
       return dummy.quaternion.clone();
     };
 
-    // Focus on Y-axis movement to showcase gravitational lensing changes
+    // Gentle cinematic movement: slow vertical drift + subtle zoom
     const keyframes = [
-      { t: 0.0,  angle: 0,   dist: camDist,      y: camY },       // default view
-      { t: 0.2,  angle: 0.1*introDir, dist: camDist*0.8, y: 12 }, // rise up, zoom in
-      { t: 0.4,  angle: 0.2*introDir, dist: camDist*0.6, y: 20 }, // high above, close
-      { t: 0.55, angle: 0.3*introDir, dist: camDist*0.5, y: 8 },  // descend, closest
-      { t: 0.7,  angle: 0.15*introDir,dist: camDist*0.7, y: -5 }, // below disk plane
-      { t: 0.85, angle: 0.05*introDir,dist: camDist*0.9, y: 2 },  // returning low
-      { t: 1.0,  angle: 0,   dist: camDist,      y: camY },       // back to default
+      { t: 0.0,  angle: 0,             dist: camDist,      y: camY },     // default
+      { t: 0.3,  angle: 0.05*introDir, dist: camDist*0.9,  y: camY+3 },  // slowly rise
+      { t: 0.6,  angle: 0.1*introDir,  dist: camDist*0.85, y: camY+6 },  // a bit higher
+      { t: 0.8,  angle: 0.05*introDir, dist: camDist*0.9,  y: camY+2 },  // gently descend
+      { t: 1.0,  angle: 0,             dist: camDist,      y: camY },     // back to default
     ];
 
     // Interpolate keyframes into smooth path
