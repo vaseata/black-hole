@@ -935,34 +935,27 @@ class BlackHoleApp {
       return dummy.quaternion.clone();
     };
 
-    // Cinematic demo: all variants START and END at defaultCamPos
-    // Movement is sin-based so both t=0 and t=1 return to zero offset
+    // One-way smooth approach to default position
     const variant = Math.floor(Math.random() * 3);
+    // Start positions (slightly offset from default)
+    let startA, startD, startY;
+    if (variant === 0) {
+      startA = introDir * 0.2;  startD = camDist * 1.15; startY = camY + 6;
+    } else if (variant === 1) {
+      startA = introDir * 0.15; startD = camDist * 1.1;  startY = camY - 8;
+    } else {
+      startA = introDir * 0.12; startD = camDist * 0.8;  startY = camY + 4;
+    }
+
     const numKeys = 80;
     this.introKeys = [];
     for (let i = 0; i <= numKeys; i++) {
       const t = i / numKeys;
-      // sin(t*PI) = 0 at t=0 and t=1, peaks at t=0.5
-      const wave = Math.sin(t * Math.PI);
-      let angle, dist, y;
-
-      if (variant === 0) {
-        // A: gentle rise + subtle orbit
-        angle = introDir * 0.12 * wave;
-        dist = camDist * (1.0 - 0.1 * wave);
-        y = camY + 5 * wave;
-      } else if (variant === 1) {
-        // B: dip below then rise (crosses disk plane)
-        angle = introDir * 0.08 * wave;
-        dist = camDist * (1.0 - 0.08 * wave);
-        y = camY - 8 * Math.sin(t * Math.PI * 1.3) * (1 - t);
-      } else {
-        // C: zoom in close + slight angle
-        angle = introDir * 0.06 * wave;
-        dist = camDist * (1.0 - 0.18 * wave);
-        y = camY + 2 * wave;
-      }
-
+      const ease = t * t * (3 - 2 * t);
+      // All values go one-way: start → default
+      const angle = startA * (1 - ease);
+      const dist = startD + (camDist - startD) * ease;
+      const y = startY + (camY - startY) * ease;
       const pos = new THREE.Vector3(Math.sin(angle) * dist, y, Math.cos(angle) * dist);
       const quat = quatFromPos(pos);
       this.introKeys.push({ pos, quat });
