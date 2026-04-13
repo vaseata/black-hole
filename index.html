@@ -864,7 +864,7 @@ class BlackHoleApp {
     this.introDir = Math.random() < 0.5 ? 1 : -1;
     this.introStartDist = 70 + Math.random() * 20;
     this.introStartY = (5 + Math.random() * 10) * (Math.random() < 0.5 ? 1 : -1);
-    this.controls.enabled = false;
+    this.controls.enabled = !this.introActive;
 
     // Track user interaction to avoid idle controls.update() jitter
     this.userInteracting = false;
