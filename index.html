@@ -841,7 +841,7 @@ class BlackHoleApp {
 
     this.bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.0, 0.5, 0.8  // strength=0 for jitter test
+      0.6, 0.5, 0.8
     );
     this.composer.addPass(this.bloomPass);
 
@@ -969,9 +969,7 @@ class BlackHoleApp {
       }
     }
 
-    if (!this.introActive) {
-      this.controls.update();
-    }
+    // controls.update() removed — jitter test
 
     this.uniforms.uTime.value = elapsed;
     this.uniforms.uFov.value = this.camera.fov;
